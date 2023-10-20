@@ -6,4 +6,6 @@ logs
 attachments
 *.patch
 
-
+# vsemkin test files
+/src/main/resources/application.yaml_backup
+/src/test/resources/with-test-db.yaml
