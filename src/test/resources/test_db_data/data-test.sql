@@ -8,23 +8,28 @@ from PROFILE;
 
 delete
 from ACTIVITY;
+create sequence ACTIVITY_ID_SEQ;
 alter
 sequence ACTIVITY_ID_SEQ restart with 1;
 delete
 from TASK;
+create sequence TASK_ID_SEQ;
 alter
 sequence TASK_ID_SEQ restart with 1;
 delete
 from SPRINT;
+create sequence SPRINT_ID_SEQ;
 alter
 sequence SPRINT_ID_SEQ restart with 1;
 delete
 from PROJECT;
+create sequence PROJECT_ID_SEQ;
 alter
 sequence PROJECT_ID_SEQ restart with 1;
 
 delete
 from USERS;
+create sequence USERS_ID_SEQ;
 alter
 sequence USERS_ID_SEQ restart with 1;
 
@@ -48,7 +53,7 @@ insert into PROFILE (ID, LAST_FAILED_LOGIN, LAST_LOGIN, MAIL_NOTIFICATIONS)
 values (1, null, null, 49),
        (2, null, null, 14);
 
-insert into CONTACT (ID, CODE, VALUE)
+insert into CONTACT (ID, CODE, "VALUE")
 values (1, 'skype', 'userSkype'),
        (1, 'mobile', '+01234567890'),
        (1, 'website', 'user.com'),
