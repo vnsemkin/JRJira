@@ -33,6 +33,7 @@ public class TaskService {
     static final String CANNOT_ASSIGN = "Cannot assign as %s to task with status=%s";
     static final String CANNOT_UN_ASSIGN = "Cannot unassign as %s from task with status=%s";
 
+    private final TaskRepository taskRepository;
     private final Handlers.TaskExtHandler handler;
     private final Handlers.ActivityHandler activityHandler;
     private final TaskFullMapper fullMapper;
@@ -92,6 +93,7 @@ public class TaskService {
         List<Activity> activities = activityHandler.getRepository().findAllByTaskIdOrderByUpdatedDesc(id);
         fillExtraFields(taskToFull, activities);
         taskToFull.setActivityTos(activityHandler.getMapper().toToList(activities));
+        taskToFull.setTags(task.getTags());
         return taskToFull;
     }
 
@@ -139,5 +141,9 @@ public class TaskService {
         if (!userType.equals(possibleUserType)) {
             throw new DataConflictException(String.format(assign ? CANNOT_ASSIGN : CANNOT_UN_ASSIGN, userType, task.getStatusCode()));
         }
+    }
+
+    public void setTagToTask(long id, String tag){
+        taskRepository.addTagToTask(id,tag);
     }
 }

@@ -1,8 +1,10 @@
 package com.javarush.jira.bugtracking.task;
 
 import com.javarush.jira.common.BaseRepository;
+import jakarta.persistence.NamedNativeQuery;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,7 +21,12 @@ public interface TaskRepository extends BaseRepository<Task> {
     @Query("SELECT t FROM Task t WHERE t.projectId =:projectId ORDER BY t.startpoint DESC")
     List<Task> findAllByProjectId(long projectId);
 
-    @Query("SELECT t FROM Task t JOIN FETCH t.project LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.parent WHERE t.id =:id")
+    @Query("SELECT t FROM Task t " +
+            "JOIN FETCH t.project " +
+            "LEFT JOIN FETCH t.sprint " +
+            "LEFT JOIN FETCH t.parent " +
+            "JOIN FETCH t.tags " +
+            "WHERE t.id =:id")
     Optional<Task> findFullById(long id);
 
     @Modifying
@@ -37,4 +44,9 @@ public interface TaskRepository extends BaseRepository<Task> {
             WHERE id IN (SELECT child FROM task_with_subtasks)
             """, nativeQuery = true)
     void setTaskAndSubTasksSprint(long taskId, Long sprintId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO task_tag (task_id, tag) VALUES (:taskId, :tag)", nativeQuery = true)
+    void addTagToTask(Long taskId, String tag);
 }
