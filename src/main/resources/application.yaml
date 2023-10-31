@@ -10,6 +10,7 @@ app:
 spring:
   init:
     mode: never
+
   jpa:
     show-sql: true
     open-in-view: false
@@ -26,7 +27,7 @@ spring:
         # https://stackoverflow.com/questions/21257819/what-is-the-difference-between-hibernate-jdbc-fetch-size-and-hibernate-jdbc-batc
         jdbc.batch_size: 20
   datasource:
-    url: jdbc:postgresql://localhost:5432/jira
+    url: ${SPRING_DATASOURCE_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
@@ -75,10 +76,6 @@ spring:
             user-info-uri: https://gitlab.com/api/v4/user
             user-name-attribute: email
 
-  sql:
-    init:
-      mode: always
-
   mail:
     properties:
       mail:
@@ -94,6 +91,12 @@ spring:
 
   mvc.throw-exception-if-no-handler-found: true
   web.resources.add-mappings: false
+
+  # For test script data.sql init
+#  sql:
+#    init:
+#      mode: always
+#      data-locations: classpath:data4dev/data.sql
 
 logging:
   level:

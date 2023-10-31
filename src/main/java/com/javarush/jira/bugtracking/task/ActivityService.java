@@ -8,15 +8,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.javarush.jira.bugtracking.task.TaskUtil.getLatestValue;
 
 @Service
 @RequiredArgsConstructor
 public class ActivityService {
+    private final static String READY_FOR_REVIEW = "ready_for_review";
+    private final static String IN_PROGRESS = "in_progress";
+    private final static String DONE = "done";
     private final TaskRepository taskRepository;
-
+    private final ActivityRepository activityRepository;
     private final Handlers.ActivityHandler handler;
 
     private static void checkBelong(HasAuthorId activity) {
@@ -72,5 +79,49 @@ public class ActivityService {
                 task.setTypeCode(latestType);
             }
         }
+    }
+
+    public long taskSummaryDurationBeforeReview(long id) {
+        return getTaskStatusDuration(id, IN_PROGRESS, READY_FOR_REVIEW);
+    }
+
+    public long taskSummaryDurationBeforeDone(long id) {
+        return getTaskStatusDuration(id, READY_FOR_REVIEW, DONE);
+    }
+
+    private long getTaskStatusDuration(long id, String statusCode1, String statusCode2) {
+        List<Activity> allById = activityRepository.findAllByTaskId(id);
+        Optional<LocalDateTime> startTask = allById
+                .stream()
+                .filter(a -> Objects.nonNull(a.getStatusCode()))
+                .filter(a -> a.getStatusCode().equals(statusCode1))
+                .map(Activity::getUpdated)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo);
+
+        Optional<LocalDateTime> restartTask = allById
+                .stream()
+                .filter(a -> Objects.nonNull(a.getStatusCode()))
+                .filter(a -> a.getStatusCode().equals(statusCode1))
+                .map(Activity::getUpdated)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo);
+
+        Optional<LocalDateTime> stopTask = allById
+                .stream()
+                .filter(a -> Objects.nonNull(a.getStatusCode()))
+                .filter(a -> a.getStatusCode().equals(statusCode2))
+                .map(Activity::getUpdated)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo);
+
+        if (startTask.isPresent()
+                && stopTask.isPresent()
+                && restartTask.isPresent()) {
+            if (restartTask.get().isBefore(stopTask.get())) {
+                return Duration.between(startTask.get(), stopTask.get()).toMillis();
+            }
+        }
+        return 0;
     }
 }

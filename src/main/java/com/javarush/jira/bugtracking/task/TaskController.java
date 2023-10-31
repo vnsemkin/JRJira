@@ -93,6 +93,13 @@ public class TaskController {
         handler.enable(id, enabled);
     }
 
+    @PatchMapping("/{id}/set-tag")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setTagToTask(@PathVariable long id, @RequestParam String tag) {
+        log.info("Set tag {} to task {}", tag, id);
+        taskService.setTagToTask(id, tag);
+    }
+
     @PatchMapping("/{id}/change-status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTaskStatus(@PathVariable long id, @NotBlank @RequestParam String statusCode) {
