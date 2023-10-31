@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+  # Spring Boot Application
+  jira_rush:
+    container_name: jira_rush_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # Define environment variables for your Spring Boot application if needed
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_jira_rush:5432/jira_rush
+      DB_USERNAME: jira
+      DB_PASSWORD: JiraRush
+      GITHUB_CLIENT_ID: 3d0d8738e65881fff266
+      GITHUB_CLIENT_SECRET: 0f97031ce6178b7dfb67a6af587f37e222a16120
+      GOOGLE_CLIENT_ID: 329113642700-f8if6pu68j2repq3ef6umd5jgiliup60_apps_googleusercontent_com
+      GOOGLE_CLIENT_SECRET: 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
+      GITLAB_CLIENT_ID: b8520a3266089063c0d8261cce36971defa513f5ffd9f9b7a3d16728fc83a494
+      GITLAB_CLIENT_SECRET: e72c65320cf9d6495984a37b0f9cc03ec46be0bb6f071feaebbfe75168117004
+      GMAIL_USERNAME: jira4jr@gmail.com
+      GMAIL_PASSWORD: zdfzsrqvgimldzyj
+    depends_on:
+      - postgres-db-jira-rush
+    networks:
+        custom_network:
+          ipv4_address: 172.22.0.2
+    volumes:
+      - ./resources:/resources
+    # Add other necessary configurations as needed
+
+  # PostgreSQL Database
+  postgres-db-jira-rush:
+    container_name: postgres_jira_rush
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: jira_rush
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: JiraRush
+    ports:
+      - "5432:5432"
+    networks:
+      custom_network:
+        ipv4_address: 172.22.0.3
+
+  # Nginx
+  nginx:
+    container_name: nginx_jira_rush
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./resources:/resources
+      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - jira_rush
+    networks:
+      custom_network:
+        ipv4_address: 172.22.0.4
+
+networks:
+  custom_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/24
+
