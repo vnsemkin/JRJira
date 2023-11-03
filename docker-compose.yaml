@@ -10,7 +10,7 @@ services:
       - "8080:8080"
     environment:
       # Define environment variables for your Spring Boot application if needed
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_jira_rush:5432/jira_rush
+      DATASOURCE_URL: jdbc:postgresql://postgres_jira_rush:5432/jira_rush
       DB_USERNAME: jira
       DB_PASSWORD: JiraRush
       GITHUB_CLIENT_ID: 3d0d8738e65881fff266
