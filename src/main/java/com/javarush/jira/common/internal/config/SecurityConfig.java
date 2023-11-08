@@ -1,5 +1,6 @@
 package com.javarush.jira.common.internal.config;
 
+import com.javarush.jira.common.internal.config.jwt.JwtRequestFilter;
 import com.javarush.jira.login.AuthUser;
 import com.javarush.jira.login.Role;
 import com.javarush.jira.login.internal.UserRepository;
@@ -27,6 +28,7 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCo
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -38,7 +40,7 @@ import java.util.Arrays;
 //https://stackoverflow.com/questions/72493425/548473
 public class SecurityConfig {
     public static final PasswordEncoder PASSWORD_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
+    private final JwtRequestFilter jwtRequestFilter;
     private final UserRepository userRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
@@ -75,7 +77,8 @@ public class SecurityConfig {
                 .and().httpBasic()
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER) // support sessions Cookie for UI ajax
-                .and().csrf().disable();
+                .and().csrf().disable()
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

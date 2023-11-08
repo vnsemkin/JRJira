@@ -1,5 +1,6 @@
 package com.javarush.jira.common.internal.config.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtTokenUtils {
@@ -27,13 +31,25 @@ public class JwtTokenUtils {
          Date issueDate = new Date();
          Date expiredDate = new Date(issueDate.getTime() + jwtLifetime.toMillis());
         return Jwts.builder()
-                .claims(claims)
-                .subject(userDetails.getUsername())
-                .issuedAt(issueDate)
-                .expiration(expiredDate)
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(issueDate)
+                .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256,secret)
                 .compact();
 
     }
 
+    public Claims getAllClaims(String token){
+      return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    }
+
+
+    public String getUsername(String token){
+        return getAllClaims(token).getSubject();
+    }
+
+    public List<String> getRoles(String token){
+        return getAllClaims(token).get("roles", List.class);
+    }
 }
