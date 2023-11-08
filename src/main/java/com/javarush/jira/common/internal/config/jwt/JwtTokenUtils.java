@@ -9,10 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JwtTokenUtils {
@@ -41,12 +38,23 @@ public class JwtTokenUtils {
     }
 
     public Claims getAllClaims(String token){
-      return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        Claims body = Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody();
+        return body;
     }
 
 
     public String getUsername(String token){
-        return getAllClaims(token).getSubject();
+        String username;
+        if(Objects.nonNull(token) && token.startsWith("Bearer ")){
+            String prettyToken = token.substring(7);
+            username = getAllClaims(prettyToken).getSubject();
+        }else {
+         username = getAllClaims(token).getSubject();
+        }
+        return username;
     }
 
     public List<String> getRoles(String token){

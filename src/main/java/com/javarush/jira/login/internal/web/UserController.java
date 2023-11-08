@@ -1,11 +1,14 @@
 package com.javarush.jira.login.internal.web;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.javarush.jira.common.internal.config.jwt.JwtTokenUtils;
 import com.javarush.jira.common.util.validation.View;
 import com.javarush.jira.login.AuthUser;
 import com.javarush.jira.login.User;
 import com.javarush.jira.login.UserTo;
+import com.javarush.jira.login.internal.UserRepository;
 import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
@@ -21,8 +24,11 @@ import static com.javarush.jira.common.BaseHandler.createdResponse;
 @RestController
 @RequestMapping(UserController.REST_URL)
 @CacheConfig(cacheNames = "users")
+@RequiredArgsConstructor
 public class UserController extends AbstractUserController {
     public static final String REST_URL = "/api/users";
+    private final JwtTokenUtils jwtTokenUtils;
+    private final UserRepository userRepository;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,8 +45,11 @@ public class UserController extends AbstractUserController {
     }
 
     @GetMapping
-    public User get(@AuthenticationPrincipal AuthUser authUser) {
-        return handler.get(authUser.id());
+    public User get(@RequestHeader(value = "authorization") String token) {
+        String username = jwtTokenUtils.getUsername(token);
+        User user = userRepository.getExistedByEmail(username);
+        Long id = user.getId();
+        return handler.get(id);
     }
 
     @DeleteMapping
